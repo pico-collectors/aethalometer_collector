@@ -2,7 +2,8 @@ import pytest
 from data_collecting.protocol import CorruptedDataError
 from pytest import raises
 
-from aethalometer_collector.storage_handler import generate_filename
+from aethalometer_collector.storage_handler import generate_filename, \
+    AethalometerStorageHandler
 
 
 class TestStorageHandler:
@@ -37,3 +38,38 @@ class TestStorageHandler:
         with raises(CorruptedDataError):
             generate_filename(invalid_date_value)
 
+    @pytest.mark.parametrize("data_line", [
+        '"01-jan-17","22:10",   2.5, -11.0,  -9.5',
+        '"01-jan-17"  ,"22:10",   2.5, -11.0,  -9.5',
+        '  "01-jan-17"  ,"22:10",   2.5, -11.0,  -9.5',
+    ])
+    def test_process_valid_data_line(self, data_line, tmpdir):
+
+        output_file = tmpdir.join("BC010117.csv")
+        storage = AethalometerStorageHandler(storage_directory=str(tmpdir))
+
+        storage.process(data_line)
+
+        lines = output_file.readlines()
+        assert len(lines) == 1
+        assert lines[0] == data_line + '\n'
+
+    def test_process_ignores_empty_data_lines(self, tmpdir):
+
+        storage = AethalometerStorageHandler(storage_directory=str(tmpdir))
+
+        storage.process(data="")
+
+        # No new file was created
+        assert len(tmpdir.listdir()) == 0
+
+    @pytest.mark.parametrize("data_line", [
+        '"22:10",   2.5, -11.0,  -9.5',
+        '"01-jan-17"',
+    ])
+    def test_process_invalid_data_line(self, data_line, tmpdir):
+
+        storage = AethalometerStorageHandler(storage_directory=str(tmpdir))
+
+        with raises(CorruptedDataError):
+            storage.process(data_line)

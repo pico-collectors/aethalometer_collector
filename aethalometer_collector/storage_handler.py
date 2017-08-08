@@ -1,5 +1,4 @@
 import logging
-import datetime
 
 import os
 from data_collecting.data_handler import DataHandler
@@ -16,6 +15,8 @@ class AethalometerStorageHandler(DataHandler):
     a new file is created.
     """
 
+    DELIMITER = ','
+
     def __init__(self, storage_directory: str):
         self.storage_directory = storage_directory
 
@@ -31,10 +32,14 @@ class AethalometerStorageHandler(DataHandler):
         if data == "":
             return
 
-        date_value = data
+        values = data.split(self.DELIMITER)
+
+        # There must be at least 3 values: the date, time, and a data value
+        if len(values) < 3:
+            raise CorruptedDataError("Data line has less than three values")
 
         # Obtain the filename based on the date of the data line
-        filename = generate_filename(data)
+        filename = generate_filename(date_value=values[0].strip())
 
         # Append the new data line to the output file
         # Create the output file if it does not exist
