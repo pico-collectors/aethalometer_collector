@@ -15,7 +15,7 @@ class AethalometerStorageHandler(DataHandler):
     a new file is created.
     """
 
-    DELIMITER = ','
+    _DELIMITER = ','
 
     def __init__(self, storage_directory: str):
         self.storage_directory = storage_directory
@@ -32,7 +32,7 @@ class AethalometerStorageHandler(DataHandler):
         if data == "":
             return
 
-        values = data.split(self.DELIMITER)
+        values = data.split(self._DELIMITER)
 
         # There must be at least 3 values: the date, time, and a data value
         if len(values) < 3:
