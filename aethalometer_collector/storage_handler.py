@@ -1,8 +1,9 @@
 import logging
 
 import os
+
+from data_collecting.data_collector import CorruptedDataError
 from data_collecting.data_handler import DataHandler
-from data_collecting.protocol import CorruptedDataError
 
 logger = logging.getLogger("storage_handler")
 
