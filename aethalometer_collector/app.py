@@ -13,6 +13,8 @@ Options:
 import logging
 
 import sys
+
+import os
 from data_collecting.runner import Runner
 from docopt import docopt
 
@@ -48,6 +50,12 @@ def main():
         config['producer_ip'] = args['--ip']
         config['producer_port'] = args['--port']
         config['storage_directory'] = args['--storage']
+
+    # Make sure the storage directory exists
+    if not os.path.isdir(config['storage_directory']):
+        logger.error("Storage directory does not exist: %s" %
+                     config['storage_directory'])
+        sys.exit(1)
 
     #
     # Once the configurations are set, setup the runner and execute the
