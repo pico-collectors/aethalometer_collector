@@ -16,4 +16,14 @@ setup(
     extras_require={
         'test': ['pytest', 'hypothesis'],
     },
+
+    package_data={
+        'aethalometer_collector': ['logs.ini', 'default.ini'],
+    },
+
+    entry_points={
+        'console_scripts': [
+            'aethalometer=aethalometer_collector.app:main',
+        ],
+    }
 )
