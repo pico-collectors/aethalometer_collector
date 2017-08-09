@@ -25,7 +25,7 @@ def ip_port(key_name: str, value: str) -> int:
     """
     try:
         port = int(value)
-        if 0 < port < 65536:
+        if not (0 < port < 65536):
             raise ValueError()
 
     except ValueError:
