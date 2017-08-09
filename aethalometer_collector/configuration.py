@@ -1,44 +1,78 @@
 import configparser
 from logging.config import fileConfig
+
 from pkg_resources import resource_filename, Requirement
 
 
 # region Transformation functions
 
-def ip_port(port: str) -> int:
+class ConfigValueError(Exception):
+    """ Raised when a configuration value is not valid for the key """
+
+    def __init__(self, key_name, type_name, actual_value, help_message=None):
+        self.message = "key '%s' expects an %s value, but was '%s'" % \
+                       (key_name, type_name, actual_value)
+
+        if help_message:
+            self.message += ": %s" % help_message
+
+
+def ip_port(key_name: str, value: str) -> int:
     """
     Parses a port in string format, returning the corresponding port as
-    an integer. Raises a ValueError if the port is not valid.
+    an integer. Raises a ValueError if the port is not valid with a good
+    error message indicating the error.
     """
-    port = int(port)
+    try:
+        port = int(value)
+        if 0 < port < 65536:
+            raise ValueError()
 
-    if 0 < port < 65536:
-        raise ValueError("The port must be an integer value between 0 and "
-                         "65536 (exclusive)")
+    except ValueError:
+        raise ConfigValueError(
+            key_name,
+            type_name='IP port',
+            actual_value=value,
+            help_message="must be an integer value between 0 and 65536"
+        )
 
     return port
 
 
-def positive_float(value: str) -> float:
+def positive_float(key_name: str, value: str) -> float:
     """
     Converts the specified value to a float if the value is positive.
 
+    :param key_name: name of the key to which the vlaue corresponds
     :param value: the value to convert to a float
     :return: float value
     :raise ValueError: if the value is not a float or is a non-positive float
     """
-    value = float(value)
 
-    if value <= 0:
-        raise ValueError()
+    try:
+        converted_value = float(value)
+        if converted_value <= 0:
+            raise ValueError()
 
+    except ValueError:
+        raise ConfigValueError(
+            key_name,
+            type_name='positive float',
+            actual_value=value
+        )
+
+    return converted_value
+
+
+def string(key_name: str, value: str) -> str:
+    """ Returns the specified value without performing any action """
     return value
+
 
 # endregion
 
 
 class AethalometerConfiguration:
-
     # Resource for the default configurations for the loggers
     LOGS_CONF_FILE = resource_filename(
         Requirement.parse("aethalometer_collector"),
@@ -54,11 +88,11 @@ class AethalometerConfiguration:
     # transformation function to transform the string value into the required
     # value format (see transformation functions below)
     config_keys = {
-        'reconnect_period':     ('base', positive_float),
-        'message_period':       ('base', positive_float),
-        'producer_ip':          ('aethalometer', str),
-        'producer_port':        ('aethalometer', ip_port),
-        'storage_directory':    ('aethalometer', str),
+        'reconnect_period': ('base', positive_float),
+        'message_period': ('base', positive_float),
+        'producer_ip': ('aethalometer', string),
+        'producer_port': ('aethalometer', ip_port),
+        'storage_directory': ('aethalometer', string),
     }
 
     def __init__(self):
@@ -95,7 +129,8 @@ class AethalometerConfiguration:
         configuration
         """
         section, transform = self.config_keys[config_key]
-        return transform(self._config[section][config_key])
+        value = self._config[section][config_key]
+        return transform(config_key, value)
 
     def __setitem__(self, key, value):
         section, transform = self.config_keys[key]
