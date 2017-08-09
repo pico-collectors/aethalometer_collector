@@ -90,6 +90,7 @@ class AethalometerConfiguration:
     config_keys = {
         'reconnect_period': ('base', positive_float),
         'message_period': ('base', positive_float),
+        'max_message_delay': ('base', positive_float),
         'producer_ip': ('aethalometer', string),
         'producer_port': ('aethalometer', ip_port),
         'storage_directory': ('aethalometer', string),

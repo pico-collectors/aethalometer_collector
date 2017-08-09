@@ -53,6 +53,7 @@ def main():
             producer_address=(config['producer_ip'], config['producer_port']),
             reconnect_period=config['reconnect_period'],
             message_period=config['message_period'],
+            max_msg_delay=config['max_message_delay']
         ))
 
     except ConfigValueError as error:
