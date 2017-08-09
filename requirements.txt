@@ -1,2 +1,2 @@
 docopt
--e git://github.com/pico-collectors/data_collecting.git@0.1#egg=data_collecting
+-e git://github.com/pico-collectors/data_collecting.git@0.2-dev#egg=data_collecting
