@@ -36,7 +36,14 @@ def main():
     config = AethalometerConfiguration()
 
     if args['--config']:
-        config.read(config_file=args['--config'])
+
+        try:
+            config.read(config_file=args['--config'])
+
+        except FileNotFoundError:
+            logger.error("Configuration file '%s' does not exist" %
+                         args['--config'])
+            sys.exit(1)
     else:
         config['producer_ip'] = args['--ip']
         config['producer_port'] = args['--port']
@@ -49,7 +56,7 @@ def main():
 
     try:
         runner = Runner(collector=AethalometerDataCollector(
-            storage_handler=AethalometerStorageHandler(config['storage_directory']),
+            AethalometerStorageHandler(config['storage_directory']),
             producer_address=(config['producer_ip'], config['producer_port']),
             reconnect_period=config['reconnect_period'],
             message_period=config['message_period'],
