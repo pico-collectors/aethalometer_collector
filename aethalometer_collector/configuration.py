@@ -1,4 +1,5 @@
 import configparser
+import logging
 from logging.config import fileConfig
 
 from pkg_resources import resource_filename, Requirement
@@ -101,10 +102,10 @@ class AethalometerConfiguration:
         Initializes the configuration with the default values defined in the
         'default.ini' file.
         """
-        self._config = configparser.ConfigParser()
-
-        # Load the default configurations for the loggers
-        fileConfig(self.LOGS_CONF_FILE)
+        # The extended interpolation is used to allow the log file to be set
+        # accordingly to the value of 'log_file' key in the configuration file
+        self._config = configparser.ConfigParser(
+            interpolation=configparser.ExtendedInterpolation())
 
         # Load the default configurations
         self.read(self.DEFAULT_CONF_FILE)
@@ -117,8 +118,16 @@ class AethalometerConfiguration:
         :param config_file: the path to the config file to be read
         :raise NotFoundError: if the specified config file does not exist
         """
+        # The configuration file needs to be read before the logs
+        # configuration file because the latter depends the values specified
+        #  in the former
         with open(config_file) as file:
             self._config.read_file(file)
+
+        # Update the loggers with the new configuration because the log file
+        # may change
+        self._config.read(self.LOGS_CONF_FILE)
+        fileConfig(self._config)
 
     def __getitem__(self, config_key):
         """

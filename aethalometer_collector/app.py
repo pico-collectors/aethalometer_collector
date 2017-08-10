@@ -46,6 +46,7 @@ def main():
             logger.error("Configuration file '%s' does not exist" %
                          args['--config'])
             sys.exit(1)
+
     else:
         config['producer_ip'] = args['--ip']
         config['producer_port'] = args['--port']
