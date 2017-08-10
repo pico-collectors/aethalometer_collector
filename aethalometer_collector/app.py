@@ -48,8 +48,8 @@ def main():
             sys.exit(1)
 
     else:
-        config['producer_ip'] = args['--ip']
-        config['producer_port'] = args['--port']
+        config['ip'] = args['--ip']
+        config['port'] = args['--port']
         config['storage_directory'] = args['--storage']
 
     # Make sure the storage directory exists
@@ -66,7 +66,7 @@ def main():
     try:
         runner = Runner(collector=AethalometerDataCollector(
             AethalometerStorageHandler(config['storage_directory']),
-            producer_address=(config['producer_ip'], config['producer_port']),
+            producer_address=(config['ip'], config['port']),
             reconnect_period=config['reconnect_period'],
             message_period=config['message_period'],
             max_msg_delay=config['max_message_delay']
