@@ -4,6 +4,7 @@ import os
 
 from data_collecting.data_collector import CorruptedDataError
 from data_collecting.data_handler import DataHandler
+from data_collecting.exceptions import UnrecoverableError
 
 logger = logging.getLogger("storage_handler")
 
@@ -42,12 +43,17 @@ class AethalometerStorageHandler(DataHandler):
         # Obtain the filename based on the date of the data line
         filename = generate_filename(date_value=values[0].strip())
 
-        # Append the new data line to the output file
-        # Create the output file if it does not exist
-        output_path = os.path.join(self.storage_directory, filename)
-        with open(output_path, "a") as out_file:
-            out_file.write(data)
-            out_file.write('\n')
+        try:
+            # Append the new data line to the output file
+            # Create the output file if it does not exist
+            output_path = os.path.join(self.storage_directory, filename)
+            with open(output_path, "a") as out_file:
+                out_file.write(data)
+                out_file.write('\n')
+
+        except OSError as error:
+            raise UnrecoverableError("Failed to access the storage directory: "
+                                     "%s" % str(error))
 
         logger.info("Wrote a new data line to '%s'" % filename)
         logger.debug("line: %s" % data)
