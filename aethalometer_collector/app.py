@@ -63,6 +63,10 @@ def main():
     # program
     #
 
+    # Store the Process ID
+    with open(config['pid_file'], "w") as file:
+        file.write(str(os.getpid()))
+
     try:
         runner = Runner(collector=AethalometerDataCollector(
             AethalometerStorageHandler(config['storage_directory']),

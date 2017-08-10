@@ -89,6 +89,7 @@ class AethalometerConfiguration:
     # transformation function to transform the string value into the required
     # value format (see transformation functions below)
     config_keys = {
+        'pid_file': ('base', string),
         'reconnect_period': ('base', positive_float),
         'message_period': ('base', positive_float),
         'max_message_delay': ('base', positive_float),
